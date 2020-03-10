@@ -1,6 +1,8 @@
 'use strict';
 
-import logger from './utils/Logger'
+import logger from './utils/Logger';
+import UserModel from './UserModel';
+import ExerciseModel from './ExerciseModel';
 
 logger.info('Starting chico_express ... ')
 
@@ -9,6 +11,7 @@ var mongo = require('mongodb');
 var mongoose = require('mongoose');
 var bodyParser = require('body-parser');
 var cors = require('cors');
+var sfy = JSON.stringify;
 
 var app = express();
 app.use(express.json()) // for parsing application/json
@@ -36,6 +39,63 @@ app.use(express.static('public'))
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/views/index.html')
 });
+
+
+// creating a new user
+app.post('/api/exercise/new-user', (req, res)=>{
+  try{
+    logger.verbose("inside /api/exercise/new-user")
+    let username = req.body.username;
+    UserModel.add(username).then((result)=>{
+      logger.verbose("result from add is " + sfy(result))
+       if(result.error){
+        logger.verbose("found an error " + result.error.code);
+        if(result.code==11000){
+          logger.verbose("username already taken");
+          res.send("username already taken");
+        }else{
+          res.send(result);
+        }
+       }else{
+        res.send(result);
+       }
+
+    })
+
+  }catch(err){
+    res.send(err);
+  }
+})
+
+app.post('/api/exercise/add', (req, res)=>{
+  logger.verbose("inside /api/exercise/add with " );
+  try{
+    let exercise = {};
+    exercise.user_id = req.body.userId;
+    exercise.date = new Date(req.body.date);
+    exercise.description = req.body.description;
+    exercise.duration = req.body.duration;
+    ExerciseModel.add(exercise).then((result)=>{
+      res.send(result);
+    })
+  }catch(err){
+    res.send(err)
+  }
+})
+
+app.get('/api/exercise/log', (req, res)=>{
+  logger.verbose("insdie /api/exercise/log params are " + JSON.stringify(req.query));
+  try{
+    let exercises = {};
+    ExerciseModel.findByUserId(req.query.userId, req.query.from, req.query.to, req.query.limit).then((result)=>{
+      logger.verbose("finished finding result is " + result);
+      res.send(result);
+    })
+  }catch(err){
+    res.send(err);
+  }
+
+})
 
 
 // Not found middleware
