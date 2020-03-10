@@ -1,5 +1,6 @@
 var sfy = JSON.stringify;
 var mongo = require('mongodb');
+var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 import logger from './utils/Logger';
