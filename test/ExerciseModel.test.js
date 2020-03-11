@@ -1,7 +1,7 @@
 var sfy = JSON.stringify;
-import ExerciseModel from './ExerciseModel';
-import logger from './utils/Logger'
-import UserModel from './UserModel'
+import ExerciseModel from '../src/ExerciseModel';
+import logger from '../src/utils/Logger'
+import UserModel from '../src/UserModel'
 import shortid from 'shortid';
 
 const MongodbMemoryServer = require('mongodb-memory-server')
